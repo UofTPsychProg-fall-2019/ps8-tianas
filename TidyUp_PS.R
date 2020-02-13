@@ -8,7 +8,7 @@ library(tidyverse)
 # reading in IAT data  ---------------------------------------------
 
 # use a tidyverse function to read in the included IAT_2019.csv file 
-tbl <- ...
+tbl <- read_csv("IAT.csv")
 
 # Removing unnecessary rows and columns  ---------------------------------------------
 # This data frame only contains 21 of the 454 available variables, but it's still too much
@@ -16,12 +16,15 @@ tbl <- ...
 # use tidyverse functions so that only the following variables are included: 'session_id',"genderidentity","raceomb_002","D_biep.White_Good_all","Mn_RT_all_3467",
 #       "edu_14","politicalid_7","STATE","att_7","tblacks_0to10","twhites_0to10","labels"
 
-tbl_clean <- ...
+tbl_clean <- select(tbl, -c(13:21))
+
+#### assuming that "genderidentity" means the "gender" column
 
 # next, clean up the rows 
 # our primary dependent variable is D_biep.White_Good_all, but some subjects
 # don't have any data. Remove the rows with missing D_biep.White_Good_all entries 
-tbl_clean <- ...
+
+tbl_clean <- drop_na(tbl_clean, D_biep.White_Good_all)
 
 # Renaming varialbles  ---------------------------------------------
 
@@ -39,7 +42,66 @@ tbl_clean <- ...
 # temp_b : tblacks_0to10 (temperature feelings black 1 "extremely cold" 10 "extremly warm")
 # temp_w : twhites_0to10 (temperature feelings black 1 "extremely cold" 10 "extremly warm")
 
-tbl_clean <- ...
+tbl_clean <- rename(tbl_clean, 
+                    id=session_id,
+                    race=raceomb_002,
+                    bias=D_biep.White_Good_all,
+                    rt=Mn_RT_all_3467,
+                    edu=edu_14,
+                    pol=politicalid_7,
+                    state=STATE,
+                    att=att_7,
+                    temp_b=tblacks_0to10,
+                    temp_w=twhites_0to10
+                    )
+
+gsub("\\[|\\]", "", tbl_clean)
+
+tbl_clean$gender <- recode(tbl_clean$gender,
+                         `[1]`= "Male",
+                         `[2]`= "Female",
+                         `[3]` = "Trans male/Trans man",
+                         `[4]` = "Trans female/Trans woman",
+                         `[5]` = "Genderqueer/Gender nonconforming",
+                         `[6]` = "A different identity",
+                          )
+
+tbl_clean$race <- recode(tbl_clean$race,
+                         `1`= "American Indian",
+                         `2`= "East Asian",
+                         `3` = "South Asian",
+                         `4` = "Hawaiian Pacific Islander",
+                         `5` = "black African American",
+                         `6` = "white",
+                         `7` = "other",
+                         `8` = "multiracial"
+                         )
+
+tbl_clean$edu <- recode(tbl_clean$edu,
+                         `1`= "elementary",
+                         `2`= "junior high",
+                         `3` = "some high school",
+                         `4` = "HS grad",
+                         `5` = "some college",
+                         `6` = "associate's",
+                         `7` = "bachelor's",
+                         `8` = "some grad",
+                         `9` = "MA",
+                         `10` = "JD",
+                         `11` = "MD",
+                         `12` = "PhD",
+                         `13` = "other advanced",
+                         `14` = "MBA"
+                          )
+
+tbl_clean$pol <- recode(tbl_clean$pol,
+                        `1` = )
+# pol : politicalid_7 (political identification: 1 "strongly conservative 7 "strongly liberal)
+# att : att_7 (race attitude 1 "strongly prefer AA" 7 "strongly prefer white")
+# temp_b : tblacks_0to10 (temperature feelings black 1 "extremely cold" 10 "extremly warm")
+# temp_w : twhites_0to10 (temperature feelings black 1 "extremely cold" 10 "extremly warm")
+
+### i didn't recode the scalar values because i wasn't sure if that made sense to do
 
 #  missing values  ---------------------------------------------  
 
@@ -47,7 +109,7 @@ summary(tbl_clean)
 # some of our variables have missing values that aren't properly coded as missing  
 # recode missing values in gender and state
 
-tbl_clean$gender <- 
+tbl_clean$gender <- drop_na(tbl_clean$gender)
 
 tbl_clean$state <- ...
 
