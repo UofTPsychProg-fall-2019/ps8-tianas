@@ -26,7 +26,7 @@ tbl_clean <- select(tbl, -c(13:21))
 
 tbl_clean <- drop_na(tbl_clean, D_biep.White_Good_all)
 
-# Renaming varialbles  ---------------------------------------------
+# Renaming variables  ---------------------------------------------
 
 # next rename variables with more intuitive, short labels 
 # here are some suggestions (along with variable info)
@@ -55,69 +55,71 @@ tbl_clean <- rename(tbl_clean,
                     temp_w=twhites_0to10
                     )
 
-gsub("\\[|\\]", "", tbl_clean)
+# tbl_clean$gender <- recode(tbl_clean$gender,
+#                         "[1]"= "Male",
+#                         "[2]"= "Female",
+#                         "[3]" = "Trans male/Trans man",
+#                         "[4]" = "Trans female/Trans woman",
+# "[5]" = "Genderqueer/Gender nonconforming",
+#                         "[6]" = "A different identity",
+#                          )
 
-tbl_clean$gender <- recode(tbl_clean$gender,
-                         `[1]`= "Male",
-                         `[2]`= "Female",
-                         `[3]` = "Trans male/Trans man",
-                         `[4]` = "Trans female/Trans woman",
-                         `[5]` = "Genderqueer/Gender nonconforming",
-                         `[6]` = "A different identity",
-                          )
+#tbl_clean$race <- recode(tbl_clean$race,
+#                         `1`= "American Indian",
+#                         `2`= "East Asian",
+#                         `3` = "South Asian",
+#                         `4` = "Hawaiian Pacific Islander",
+#                         `5` = "black African American",
+#                         `6` = "white",
+#                         `7` = "other",
+#                         `8` = "multiracial"
+#                         )
 
-tbl_clean$race <- recode(tbl_clean$race,
-                         `1`= "American Indian",
-                         `2`= "East Asian",
-                         `3` = "South Asian",
-                         `4` = "Hawaiian Pacific Islander",
-                         `5` = "black African American",
-                         `6` = "white",
-                         `7` = "other",
-                         `8` = "multiracial"
-                         )
+# tbl_clean$edu <- recode(tbl_clean$edu,
+#                         `1`= "elementary",
+#                         `2`= "junior high",
+#                         `3` = "some high school",
+#                         `4` = "HS grad",
+#                         `5` = "some college",
+#                         `6` = "associate's",
+#                         `7` = "bachelor's",
+#                         `8` = "some grad",
+#                         `9` = "MA",
+#                         `10` = "JD",
+#                         `11` = "MD",
+#                         `12` = "PhD",
+#                         `13` = "other advanced",
+#                         `14` = "MBA"
+#                          )
 
-tbl_clean$edu <- recode(tbl_clean$edu,
-                         `1`= "elementary",
-                         `2`= "junior high",
-                         `3` = "some high school",
-                         `4` = "HS grad",
-                         `5` = "some college",
-                         `6` = "associate's",
-                         `7` = "bachelor's",
-                         `8` = "some grad",
-                         `9` = "MA",
-                         `10` = "JD",
-                         `11` = "MD",
-                         `12` = "PhD",
-                         `13` = "other advanced",
-                         `14` = "MBA"
-                          )
-
-tbl_clean$pol <- recode(tbl_clean$pol,
-                        `1` = )
-# pol : politicalid_7 (political identification: 1 "strongly conservative 7 "strongly liberal)
-# att : att_7 (race attitude 1 "strongly prefer AA" 7 "strongly prefer white")
-# temp_b : tblacks_0to10 (temperature feelings black 1 "extremely cold" 10 "extremly warm")
-# temp_w : twhites_0to10 (temperature feelings black 1 "extremely cold" 10 "extremly warm")
-
-### i didn't recode the scalar values because i wasn't sure if that made sense to do
+### I didn't recode the scalar values (pol, att, temp_b, temp_w) because I'm not sure that really makes sense in this table
 
 #  missing values  ---------------------------------------------  
 
-summary(tbl_clean)
+# summary(tbl_clean)
 # some of our variables have missing values that aren't properly coded as missing  
 # recode missing values in gender and state
 
-tbl_clean$gender <- drop_na(tbl_clean$gender)
+#unique(tbl_clean$state)
 
-tbl_clean$state <- ...
+tbl_clean$gender <- na_if(tbl_clean$gender, "")
+
+#tbl_clean$state <- na_if(tbl_clean$state, "")
+
 
 # changing variable types  ---------------------------------------------  
 # next, convert id and all variables that are character types to factors
 # try to convert all variables at once using tidyverse functions
 
-tbl_clean <- ...
+summary(tbl_clean)
+
+# tbl_clean$id <- factor(tbl_clean$id) one at a time
+
+str(tbl_clean)
+  
+factorVar <- c("id", "gender", "race", "bias", "rt", "edu", "pol", "state", "att", "temp_b", "temp_w", "labels")
+
+tbl_clean <- mutate_at(tbl_clean, factorVar, ~factor(.))
 
 # recoding variables  ---------------------------------------------  
 # participants were instructed to select all the gender idenities that apply to them
@@ -125,14 +127,30 @@ tbl_clean <- ...
 # this pipeline tabulates the number of participants who endorse different gender identities. 
 gender_count <- tbl_clean %>% group_by(gender) %>% tally()  
 
+gender_count
+
 # sort the output and then use indexing to print the 3 most common response (not inlcuding missing values)
-gender_count <- ...
+
+# drop the NAs out of this tibble
+gender_count <- drop_na(gender_count, gender)
+
+# and now, put in descending order
+gender_count <- arrange(gender_count, desc(n))
+
+#print
+top_n(gender_count, 3)
 
 # create a new variable that recodes gender to have 4 levels: the 3 most common responses and the others collapsed together
 # you can use the key provided on line 31 to understand the levels
 # check out recode documentation to see if there's a trick for setting defaults values for unspecified rows
 # *note that this excercise in data recoding doesn't reflect the instructors' views on gender identities...
-tbl_clean$gender4 <- ...
+tbl_clean$gender4 <- tbl_clean$gender
+tbl_clean$gender4 <- recode(tbl_clean$gender, "[2]"=1, "[1]"=2, "[5]"=3,)
+
+tbl$superfast <- tbl$expdur
+tbl$superfast <- recode(tbl$superfast, "33" = 1, "50"=0, "125"=0)
+tbl$superfast <- recode((tbl$expdur==33)==1)
+
 
 # Now take a look at how highest obtained education is coded (key on line 35)
 edu_count <- tbl_clean %>% group_by(edu_14) %>% tally()  
