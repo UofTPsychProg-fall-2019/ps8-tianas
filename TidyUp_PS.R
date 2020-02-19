@@ -69,21 +69,19 @@ tbl_clean$gender <- fct_explicit_na(tbl_clean$gender, na_level = "(Missing)")
 
 tbl_clean$state <- fct_explicit_na(tbl_clean$state, na_level = "(Missing)")
 
-unique(tbl_clean$gender)
-
 # changing variable types  ---------------------------------------------  
 # next, convert id and all variables that are character types to factors
 # try to convert all variables at once using tidyverse functions
 
 summary(tbl_clean)
 
-# tbl_clean$id <- factor(tbl_clean$id) one at a time
-
 str(tbl_clean)
   
 factorVar <- c("id", "gender", "race", "rt", "edu", "pol", "state", "att", "temp_b", "temp_w", "labels")
 
 tbl_clean <- mutate_at(tbl_clean, factorVar, ~factor(.))
+
+# excluding bias to perform mean calculations later on without reverting back to numerical
 
 # recoding variables  ---------------------------------------------  
 # participants were instructed to select all the gender idenities that apply to them
@@ -98,6 +96,7 @@ gender_count
 # put in descending order
 gender_count <- arrange(gender_count, desc(n))
 
+# filter missing values
 gender_count <- gender_count %>% filter(gender != '(Missing)')
 
 print(gender_count[1:3,])
@@ -111,12 +110,11 @@ tbl_clean$gender4 <- recode(tbl_clean$gender, "[2]"=1, "[1]"=2, "[5]"=3, .defaul
 
 # Now take a look at how highest obtained education is coded (key on line 35)
 
-tbl_clean$edu <- fct_explicit_na(tbl_clean$edu)
-
 edu_count <- tbl_clean %>% group_by(edu) %>% tally()
 
 #create a new variable that recodes education into: no highscool, some highschool, highschool graduate, some college, postsecondary degree, masters (MA & MBA), advanced degree
 #remember that the recode function isn't always the best solution for numeric variables
+
 tbl_clean$edu7 <- as.factor(tbl_clean$edu)
 
 tbl_clean$edu7 <- recode(tbl_clean$edu,
@@ -139,7 +137,7 @@ tbl_clean$edu7 <- recode(tbl_clean$edu,
 # mutating variables ---------------------------------------------  
 # rewrite the above recoding steps so that they both occur within a single call of the mutate function
 tbl_clean <- mutate(tbl_clean, gender4 = recode(gender, "[2]"=1, "[1]"=2, "[5]"=3, .default = 4, .missing = NULL),
-                    edu_7 = recode(as.factor(edu), `1`= "no high school",
+                    edu7 = recode(as.factor(edu), `1`= "no high school",
                                             `2`= "no high school",
                                             `3` = "some high school",
                                             `4` = "high school graduate",
